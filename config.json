@@ -32,7 +32,7 @@
           "title": "Shutdown readiness",
           "subtitle": "Checklist and progress measures",
           "icon": "clipboard-check",
-          "url": "",
+          "url": "https://shutready.palmcrest.com.au/",
           "enabled": true
         },
         {
@@ -40,7 +40,7 @@
           "title": "Schedule progress",
           "subtitle": "Checklist and instructions",
           "icon": "map",
-          "url": "",
+          "url": "https://scheduleready.palmcrest.com.au/",
           "enabled": true
         }
       ]
@@ -99,7 +99,7 @@
           "subtitle": "Idea, not yet built",
           "icon": "alert-triangle",
           "url": "",
-          "enabled": false
+          "enabled": true
         },
         {
           "id": "safety-matrix",
@@ -107,7 +107,7 @@
           "subtitle": "Idea, not yet built",
           "icon": "shield-check",
           "url": "",
-          "enabled": false
+          "enabled": true
         }
       ]
     }
