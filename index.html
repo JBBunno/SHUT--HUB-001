@@ -466,7 +466,7 @@
   function loadConfig() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* fall through */ }
+      try { return Promise.resolve(JSON.parse(saved)); } catch (e) { /* fall through */ }
     }
     return fetch("config.json").then(r => r.json());
   }
