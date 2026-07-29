@@ -17,7 +17,9 @@
     --muted: #6b7686;
     --border: #e2e6ec;
     --surface: #ffffff;
-    --page: #f4f6f9;
+    --page: #0a1a30;
+    --on-dark-muted: #93a5bd;
+    --on-dark-faint: #5a6c85;
 
     --row-planning: #eef3f8;
     --row-planning-text: #17324f;
@@ -98,7 +100,7 @@
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--muted);
+    color: var(--on-dark-muted);
     margin: 0 0 10px 2px;
   }
 
@@ -377,6 +379,10 @@
     color: var(--muted);
   }
 
+  .admin-tile-row input.icon-input {
+    flex: 0 0 76px;
+  }
+
   #admin-panel .save-bar {
     margin-top: 20px;
     display: flex;
@@ -405,6 +411,28 @@
     margin-top: 10px;
     min-height: 16px;
   }
+
+  .hub-footer {
+    max-width: 1040px;
+    margin: 20px auto 0;
+    padding: 0 24px 30px;
+  }
+
+  .footer-rule {
+    border: none;
+    border-top: 1px solid var(--gold);
+    opacity: 0.55;
+    margin: 0 0 14px;
+  }
+
+  .footer-text {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--on-dark-faint);
+    margin: 0;
+  }
 </style>
 </head>
 <body>
@@ -420,6 +448,11 @@
 </header>
 
 <main id="rows-container"></main>
+
+<div class="hub-footer">
+  <hr class="footer-rule" />
+  <p class="footer-text">Palmcrest Shutdown Hub</p>
+</div>
 
 <div id="viewer">
   <div class="viewer-bar">
@@ -595,6 +628,7 @@
         r.innerHTML = `
           <div class="toggle ${tile.enabled ? "on" : ""}" data-row="${row.id}" data-tile="${tile.id}"><div class="knob"></div></div>
           <span class="name">${tile.title}</span>
+          <input type="text" class="icon-input" placeholder="icon" value="${tile.icon}" data-row="${row.id}" data-tile="${tile.id}" title="Tabler icon name, e.g. folder" />
           <input type="text" placeholder="App link (URL)" value="${tile.url}" data-row="${row.id}" data-tile="${tile.id}" />
         `;
         wrap.appendChild(r);
@@ -611,13 +645,15 @@
   function collectAdminChanges() {
     document.querySelectorAll(".admin-tile-row").forEach(rowEl => {
       const toggle = rowEl.querySelector(".toggle");
-      const input = rowEl.querySelector("input");
+      const iconInput = rowEl.querySelector(".icon-input");
+      const urlInput = rowEl.querySelector('input[type="text"]:not(.icon-input)');
       const rowId = toggle.dataset.row;
       const tileId = toggle.dataset.tile;
       const row = config.rows.find(r => r.id === rowId);
       const tile = row.tiles.find(t => t.id === tileId);
       tile.enabled = toggle.classList.contains("on");
-      tile.url = input.value.trim();
+      tile.icon = iconInput.value.trim();
+      tile.url = urlInput.value.trim();
     });
   }
 
