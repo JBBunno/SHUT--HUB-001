@@ -10,7 +10,7 @@
           "title": "Shutdown documents",
           "subtitle": "Documents folder",
           "icon": "folder",
-          "url": "\"C:\\temp\"",
+          "url": "C:\\temp",
           "enabled": true
         },
         {
@@ -18,7 +18,7 @@
           "title": "Shutdown org structure",
           "subtitle": "Shutdown team contacts",
           "icon": "sitemap",
-          "url": "",
+          "url": "https://jbbunno.github.io/OrgChrt_001/",
           "enabled": true
         }
       ]
