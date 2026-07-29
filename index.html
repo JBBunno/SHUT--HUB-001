@@ -354,7 +354,97 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--muted);
+    margin: 0;
+  }
+
+  .admin-row-label-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin: 18px 0 8px;
+  }
+
+  .add-tile-btn {
+    background: none;
+    border: none;
+    color: var(--gold-dark);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+
+  .add-tile-btn:hover {
+    text-decoration: underline;
+  }
+
+  .tile-delete-btn {
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: #a32d2d;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .tile-delete-btn:hover {
+    background: #fbeceb;
+    border-color: #e0b0ac;
+  }
+
+  .add-tile-form {
+    display: none;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    align-items: center;
+    background: #f7f8fa;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 6px;
+  }
+
+  .add-tile-form.open {
+    display: grid;
+  }
+
+  .add-tile-form input[type="text"] {
+    font-size: 12.5px;
+    padding: 7px 9px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  .add-tile-form .new-url {
+    grid-column: 1 / -1;
+  }
+
+  .add-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .add-form-actions button {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+  }
+
+  .add-form-actions .primary {
+    background: var(--gold);
+    border: none;
+    color: var(--navy);
   }
 
   .admin-tile-row {
@@ -693,10 +783,13 @@
     const wrap = document.getElementById("admin-rows");
     wrap.innerHTML = "";
     config.rows.forEach(row => {
-      const label = document.createElement("p");
-      label.className = "admin-row-label";
-      label.textContent = row.label;
-      wrap.appendChild(label);
+      const labelRow = document.createElement("div");
+      labelRow.className = "admin-row-label-line";
+      labelRow.innerHTML = `
+        <p class="admin-row-label">${row.label}</p>
+        <button type="button" class="add-tile-btn" data-row="${row.id}">+ Add tile</button>
+      `;
+      wrap.appendChild(labelRow);
 
       row.tiles.forEach(tile => {
         const r = document.createElement("div");
@@ -706,9 +799,25 @@
           <span class="name">${tile.title}</span>
           <button type="button" class="icon-picker-btn" data-row="${row.id}" data-tile="${tile.id}" data-icon="${tile.icon}" title="Change icon"><i class="ti ti-${tile.icon}"></i></button>
           <input type="text" placeholder="App link (URL)" value="${tile.url}" data-row="${row.id}" data-tile="${tile.id}" />
+          <button type="button" class="tile-delete-btn" data-row="${row.id}" data-tile="${tile.id}" title="Remove tile">&times;</button>
         `;
         wrap.appendChild(r);
       });
+
+      const addForm = document.createElement("div");
+      addForm.className = "add-tile-form";
+      addForm.id = `add-form-${row.id}`;
+      addForm.innerHTML = `
+        <input type="text" class="new-title" placeholder="Tile name" />
+        <input type="text" class="new-subtitle" placeholder="Short description" />
+        <button type="button" class="icon-picker-btn new-icon-btn" data-icon="app-window" title="Choose icon"><i class="ti ti-app-window"></i></button>
+        <input type="text" class="new-url" placeholder="App link (URL) — optional for now" />
+        <div class="add-form-actions">
+          <button type="button" class="primary add-tile-confirm" data-row="${row.id}">Add tile</button>
+          <button type="button" class="add-tile-cancel" data-row="${row.id}">Cancel</button>
+        </div>
+      `;
+      wrap.appendChild(addForm);
     });
 
     wrap.querySelectorAll(".toggle").forEach(t => {
@@ -719,6 +828,59 @@
 
     wrap.querySelectorAll(".icon-picker-btn").forEach(btn => {
       btn.addEventListener("click", e => openIconPicker(e.currentTarget));
+    });
+
+    wrap.querySelectorAll(".tile-delete-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const rowId = btn.dataset.row;
+        const tileId = btn.dataset.tile;
+        const row = config.rows.find(r => r.id === rowId);
+        const tile = row.tiles.find(t => t.id === tileId);
+        if (confirm(`Remove "${tile.title}" from the hub?`)) {
+          row.tiles = row.tiles.filter(t => t.id !== tileId);
+          renderRows();
+          renderAdmin();
+        }
+      });
+    });
+
+    wrap.querySelectorAll(".add-tile-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const form = document.getElementById(`add-form-${btn.dataset.row}`);
+        form.classList.toggle("open");
+      });
+    });
+
+    wrap.querySelectorAll(".add-tile-cancel").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.getElementById(`add-form-${btn.dataset.row}`).classList.remove("open");
+      });
+    });
+
+    wrap.querySelectorAll(".add-tile-confirm").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const rowId = btn.dataset.row;
+        const form = document.getElementById(`add-form-${rowId}`);
+        const title = form.querySelector(".new-title").value.trim();
+        const subtitle = form.querySelector(".new-subtitle").value.trim();
+        const url = form.querySelector(".new-url").value.trim();
+        const icon = form.querySelector(".new-icon-btn").dataset.icon;
+
+        if (!title) {
+          alert("Give the tile a name first.");
+          return;
+        }
+
+        const row = config.rows.find(r => r.id === rowId);
+        const baseId = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+        let id = baseId || "tile";
+        let n = 1;
+        while (row.tiles.some(t => t.id === id)) { id = `${baseId}-${n++}`; }
+
+        row.tiles.push({ id, title, subtitle: subtitle || "", icon: icon || "app-window", url, enabled: true });
+        renderRows();
+        renderAdmin();
+      });
     });
   }
 
