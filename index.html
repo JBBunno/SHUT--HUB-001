@@ -1,0 +1,649 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shutdown Hub</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css" />
+<style>
+  :root {
+    --navy: #0d1e35;
+    --navy-light: #16304f;
+    --blue: #1f4e79;
+    --gold: #e89820;
+    --gold-dark: #c8821a;
+    --ink: #1a2430;
+    --muted: #6b7686;
+    --border: #e2e6ec;
+    --surface: #ffffff;
+    --page: #f4f6f9;
+
+    --row-planning: #eef3f8;
+    --row-planning-text: #17324f;
+    --row-preparation: #e7edf5;
+    --row-preparation-text: #14263f;
+    --row-execution: #fdf3e2;
+    --row-execution-text: #6b4a0c;
+    --row-post: #eef1f5;
+    --row-post-text: #2b3947;
+    --row-safety: #fbeceb;
+    --row-safety-text: #7a2c22;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--page);
+    font-family: 'Calibri Light', 'Calibri', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 300;
+    color: var(--ink);
+  }
+
+  header {
+    background: var(--navy);
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  header .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  header .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--navy);
+    font-size: 18px;
+  }
+
+  header h1 {
+    color: #fff;
+    font-size: 19px;
+    font-weight: 300;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  header p {
+    color: #b9c4d4;
+    font-size: 12px;
+    margin: 2px 0 0;
+  }
+
+  main {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  .row-block {
+    margin-bottom: 26px;
+  }
+
+  .row-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 10px 2px;
+  }
+
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+  }
+
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.1s ease;
+    text-align: left;
+  }
+
+  .tile:hover {
+    border-color: var(--gold);
+  }
+
+  .tile:active {
+    transform: scale(0.99);
+  }
+
+  .tile .tile-icon {
+    font-size: 22px;
+    color: var(--blue);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .tile.row-execution .tile-icon,
+  .tile.row-safety .tile-icon {
+    color: var(--gold-dark);
+  }
+
+  .tile h3 {
+    font-size: 14.5px;
+    font-weight: 500;
+    margin: 0 0 3px;
+    color: var(--navy);
+  }
+
+  .tile p {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .tile.disabled {
+    opacity: 0.55;
+    cursor: default;
+    border-style: dashed;
+  }
+
+  .tile.disabled:hover {
+    border-color: var(--border);
+  }
+
+  .row-planning { background: var(--row-planning); }
+  .row-preparation { background: var(--row-preparation); }
+  .row-execution { background: var(--row-execution); }
+  .row-post { background: var(--row-post); }
+  .row-safety { background: var(--row-safety); }
+
+  /* viewer overlay */
+  #viewer {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    display: none;
+    flex-direction: column;
+    z-index: 40;
+  }
+
+  #viewer.open { display: flex; }
+
+  #viewer .viewer-bar {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+
+  #viewer .viewer-bar button {
+    background: transparent;
+    border: 1px solid #3a4d64;
+    color: #fff;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  #viewer iframe {
+    flex: 1;
+    border: none;
+    width: 100%;
+  }
+
+  #viewer .viewer-fallback {
+    flex: 1;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  #viewer .viewer-fallback a {
+    color: var(--navy);
+    background: var(--gold);
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  /* admin */
+  #admin-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 30, 53, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 20px;
+  }
+
+  #admin-overlay.open { display: flex; }
+
+  #pin-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    width: 260px;
+    text-align: center;
+  }
+
+  #pin-box h2 {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0 0 14px;
+    color: var(--navy);
+  }
+
+  #pin-box input {
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 0.3em;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+
+  #pin-box button, #admin-panel .primary {
+    width: 100%;
+    padding: 10px;
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  #pin-error {
+    color: #a32d2d;
+    font-size: 12px;
+    margin-top: 8px;
+    display: none;
+  }
+
+  #admin-panel {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 86vh;
+    overflow-y: auto;
+    padding: 22px 24px;
+    display: none;
+  }
+
+  #admin-panel.open { display: block; }
+
+  #admin-panel .admin-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  #admin-panel .admin-head h2 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--navy);
+    margin: 0;
+  }
+
+  #admin-panel .admin-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .admin-row-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin: 18px 0 8px;
+  }
+
+  .admin-tile-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toggle {
+    width: 38px;
+    height: 21px;
+    border-radius: 11px;
+    background: var(--border);
+    position: relative;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .toggle.on { background: var(--gold); }
+
+  .toggle .knob {
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: left 0.15s ease;
+  }
+
+  .toggle.on .knob { left: 19px; }
+
+  .admin-tile-row .name {
+    font-size: 13px;
+    font-weight: 500;
+    flex: 0 0 150px;
+    color: var(--ink);
+  }
+
+  .admin-tile-row input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    font-size: 12.5px;
+    padding: 7px 9px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+  }
+
+  #admin-panel .save-bar {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+  }
+
+  #admin-panel .save-bar button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+  }
+
+  #admin-panel .save-bar .primary {
+    background: var(--gold);
+    border: none;
+    color: var(--navy);
+  }
+
+  #admin-status {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    min-height: 16px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand" id="brand-trigger">
+    <div class="brand-mark"><i class="ti ti-hexagon"></i></div>
+    <div>
+      <h1 id="hub-title">Shutdown Hub</h1>
+      <p>Palm Crest Consultants</p>
+    </div>
+  </div>
+</header>
+
+<main id="rows-container"></main>
+
+<div id="viewer">
+  <div class="viewer-bar">
+    <span id="viewer-title">App</span>
+    <button id="viewer-close">Close</button>
+  </div>
+  <iframe id="viewer-frame"></iframe>
+  <div class="viewer-fallback" id="viewer-fallback">
+    <p>This app can't be shown inline. Open it in a new tab instead.</p>
+    <a id="viewer-fallback-link" href="#" target="_blank" rel="noopener">Open app</a>
+  </div>
+</div>
+
+<div id="admin-overlay">
+  <div id="pin-box">
+    <h2>Enter admin PIN</h2>
+    <input type="password" id="pin-input" inputmode="numeric" maxlength="6" autocomplete="off" />
+    <button id="pin-submit">Unlock</button>
+    <p id="pin-error">Incorrect PIN</p>
+  </div>
+
+  <div id="admin-panel">
+    <div class="admin-head">
+      <h2>Hub admin</h2>
+      <button class="admin-close" id="admin-close">&times;</button>
+    </div>
+    <div id="admin-rows"></div>
+    <div class="save-bar">
+      <button class="primary" id="admin-save">Save changes</button>
+      <button id="admin-copy">Copy config.json</button>
+    </div>
+    <p id="admin-status"></p>
+  </div>
+</div>
+
+<script>
+  // ---- Config ----
+  // Change this PIN before deploying to a client.
+  const ADMIN_PIN = "1974";
+  const STORAGE_KEY = "shutdownhub_config_" + location.pathname.replace(/\//g, "_");
+
+  let config = null;
+
+  function loadConfig() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { /* fall through */ }
+    }
+    return fetch("config.json").then(r => r.json());
+  }
+
+  function iconFor(name) {
+    return `<i class="ti ti-${name} tile-icon"></i>`;
+  }
+
+  function renderRows() {
+    const container = document.getElementById("rows-container");
+    container.innerHTML = "";
+    config.rows.forEach(row => {
+      const visibleTiles = row.tiles.filter(t => t.enabled);
+      if (visibleTiles.length === 0) return;
+
+      const block = document.createElement("div");
+      block.className = "row-block";
+
+      const label = document.createElement("p");
+      label.className = "row-label";
+      label.textContent = row.label;
+      block.appendChild(label);
+
+      const grid = document.createElement("div");
+      grid.className = "tile-grid";
+
+      visibleTiles.forEach(tile => {
+        const el = document.createElement("button");
+        el.className = `tile row-${row.id}`;
+        el.innerHTML = `${iconFor(tile.icon)}<h3>${tile.title}</h3><p>${tile.subtitle}</p>`;
+        el.addEventListener("click", () => openTile(tile));
+        grid.appendChild(el);
+      });
+
+      block.appendChild(grid);
+      container.appendChild(block);
+    });
+  }
+
+  function openTile(tile) {
+    const viewer = document.getElementById("viewer");
+    const frame = document.getElementById("viewer-frame");
+    const fallback = document.getElementById("viewer-fallback");
+    const fallbackLink = document.getElementById("viewer-fallback-link");
+    document.getElementById("viewer-title").textContent = tile.title;
+
+    if (!tile.url) {
+      frame.style.display = "none";
+      fallback.style.display = "flex";
+      fallback.querySelector("p").textContent = "This tile doesn't have a link set up yet.";
+      fallbackLink.style.display = "none";
+    } else {
+      frame.style.display = "block";
+      fallback.style.display = "none";
+      fallbackLink.style.display = "inline-block";
+      fallbackLink.href = tile.url;
+      frame.src = tile.url;
+      frame.onerror = () => {
+        frame.style.display = "none";
+        fallback.style.display = "flex";
+      };
+    }
+    viewer.classList.add("open");
+  }
+
+  document.getElementById("viewer-close").addEventListener("click", () => {
+    document.getElementById("viewer").classList.remove("open");
+    document.getElementById("viewer-frame").src = "about:blank";
+  });
+
+  // ---- Admin: 5-tap + PIN ----
+  let tapCount = 0;
+  let tapTimer = null;
+
+  document.getElementById("brand-trigger").addEventListener("click", () => {
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { tapCount = 0; }, 1500);
+    if (tapCount >= 5) {
+      tapCount = 0;
+      document.getElementById("admin-overlay").classList.add("open");
+      document.getElementById("pin-box").style.display = "block";
+      document.getElementById("admin-panel").classList.remove("open");
+      document.getElementById("pin-input").value = "";
+      document.getElementById("pin-error").style.display = "none";
+      document.getElementById("pin-input").focus();
+    }
+  });
+
+  document.getElementById("pin-submit").addEventListener("click", checkPin);
+  document.getElementById("pin-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") checkPin();
+  });
+
+  function checkPin() {
+    const val = document.getElementById("pin-input").value;
+    if (val === ADMIN_PIN) {
+      document.getElementById("pin-box").style.display = "none";
+      openAdminPanel();
+    } else {
+      document.getElementById("pin-error").style.display = "block";
+    }
+  }
+
+  function openAdminPanel() {
+    renderAdmin();
+    document.getElementById("admin-panel").classList.add("open");
+  }
+
+  document.getElementById("admin-close").addEventListener("click", () => {
+    document.getElementById("admin-overlay").classList.remove("open");
+  });
+
+  function renderAdmin() {
+    const wrap = document.getElementById("admin-rows");
+    wrap.innerHTML = "";
+    config.rows.forEach(row => {
+      const label = document.createElement("p");
+      label.className = "admin-row-label";
+      label.textContent = row.label;
+      wrap.appendChild(label);
+
+      row.tiles.forEach(tile => {
+        const r = document.createElement("div");
+        r.className = "admin-tile-row";
+        r.innerHTML = `
+          <div class="toggle ${tile.enabled ? "on" : ""}" data-row="${row.id}" data-tile="${tile.id}"><div class="knob"></div></div>
+          <span class="name">${tile.title}</span>
+          <input type="text" placeholder="App link (URL)" value="${tile.url}" data-row="${row.id}" data-tile="${tile.id}" />
+        `;
+        wrap.appendChild(r);
+      });
+    });
+
+    wrap.querySelectorAll(".toggle").forEach(t => {
+      t.addEventListener("click", () => {
+        t.classList.toggle("on");
+      });
+    });
+  }
+
+  function collectAdminChanges() {
+    document.querySelectorAll(".admin-tile-row").forEach(rowEl => {
+      const toggle = rowEl.querySelector(".toggle");
+      const input = rowEl.querySelector("input");
+      const rowId = toggle.dataset.row;
+      const tileId = toggle.dataset.tile;
+      const row = config.rows.find(r => r.id === rowId);
+      const tile = row.tiles.find(t => t.id === tileId);
+      tile.enabled = toggle.classList.contains("on");
+      tile.url = input.value.trim();
+    });
+  }
+
+  document.getElementById("admin-save").addEventListener("click", () => {
+    collectAdminChanges();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    renderRows();
+    document.getElementById("admin-status").textContent = "Saved to this browser. Use \"Copy config.json\" to push these changes to GitHub for all users.";
+  });
+
+  document.getElementById("admin-copy").addEventListener("click", () => {
+    collectAdminChanges();
+    const text = JSON.stringify(config, null, 2);
+    navigator.clipboard.writeText(text).then(() => {
+      document.getElementById("admin-status").textContent = "config.json copied to clipboard. Paste it into the GitHub file to update the live hub.";
+    }).catch(() => {
+      document.getElementById("admin-status").textContent = "Couldn't copy automatically — select and copy the JSON manually.";
+    });
+  });
+
+  // ---- init ----
+  loadConfig().then(cfg => {
+    config = cfg;
+    renderRows();
+  });
+</script>
+
+</body>
+</html>
