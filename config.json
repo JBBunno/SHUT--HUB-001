@@ -1,0 +1,115 @@
+{
+  "clientName": "Client Shutdown Hub",
+  "rows": [
+    {
+      "id": "planning",
+      "label": "Planning",
+      "tiles": [
+        {
+          "id": "documents",
+          "title": "Shutdown documents",
+          "subtitle": "Documents folder",
+          "icon": "folder",
+          "url": "",
+          "enabled": true
+        },
+        {
+          "id": "org-structure",
+          "title": "Shutdown org structure",
+          "subtitle": "Shutdown team contacts",
+          "icon": "sitemap",
+          "url": "",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "preparation",
+      "label": "Preparation",
+      "tiles": [
+        {
+          "id": "readiness",
+          "title": "Shutdown readiness",
+          "subtitle": "Checklist and progress measures",
+          "icon": "clipboard-check",
+          "url": "",
+          "enabled": true
+        },
+        {
+          "id": "schedule-progress",
+          "title": "Schedule progress",
+          "subtitle": "Checklist and instructions",
+          "icon": "map",
+          "url": "",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "execution",
+      "label": "Execution",
+      "tiles": [
+        {
+          "id": "dashboard",
+          "title": "Shutdown dashboard",
+          "subtitle": "Shutdown reporting measures",
+          "icon": "chart-bar",
+          "url": "",
+          "enabled": true
+        },
+        {
+          "id": "livetrack",
+          "title": "Shutdown LiveTrack",
+          "subtitle": "Shutdown progress reporting",
+          "icon": "activity",
+          "url": "",
+          "enabled": true
+        },
+        {
+          "id": "feedback",
+          "title": "Shutdown feedback",
+          "subtitle": "Shutdown feedback app",
+          "icon": "message-circle",
+          "url": "",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "post",
+      "label": "Post",
+      "tiles": [
+        {
+          "id": "close-out-report",
+          "title": "Schedule close out report",
+          "subtitle": "Final analysis and recommendations",
+          "icon": "file-check",
+          "url": "",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "safety",
+      "label": "Safety",
+      "tiles": [
+        {
+          "id": "risk-register",
+          "title": "Shutdown risk register",
+          "subtitle": "Idea, not yet built",
+          "icon": "alert-triangle",
+          "url": "",
+          "enabled": false
+        },
+        {
+          "id": "safety-matrix",
+          "title": "Shutdown safety matrix",
+          "subtitle": "Idea, not yet built",
+          "icon": "shield-check",
+          "url": "",
+          "enabled": false
+        }
+      ]
+    }
+  ]
+}
