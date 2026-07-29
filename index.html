@@ -5,7 +5,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Shutdown Hub</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.44.0/tabler-icons.min.css" />
 <style>
   :root {
     --navy: #0d1e35;
@@ -383,6 +383,53 @@
     flex: 0 0 76px;
   }
 
+  .icon-picker-btn {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #fff;
+    font-size: 16px;
+    color: var(--navy);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .icon-picker-btn:hover {
+    border-color: var(--gold);
+  }
+
+  .icon-popover {
+    position: absolute;
+    z-index: 60;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(13, 30, 53, 0.18);
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    width: 220px;
+  }
+
+  .icon-popover button {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-size: 16px;
+    color: var(--navy);
+    cursor: pointer;
+  }
+
+  .icon-popover button:hover {
+    background: var(--row-preparation);
+    border-color: var(--gold);
+  }
+
   #admin-panel .save-bar {
     margin-top: 20px;
     display: flex;
@@ -628,7 +675,7 @@
         r.innerHTML = `
           <div class="toggle ${tile.enabled ? "on" : ""}" data-row="${row.id}" data-tile="${tile.id}"><div class="knob"></div></div>
           <span class="name">${tile.title}</span>
-          <input type="text" class="icon-input" placeholder="icon" value="${tile.icon}" data-row="${row.id}" data-tile="${tile.id}" title="Tabler icon name, e.g. folder" />
+          <button type="button" class="icon-picker-btn" data-row="${row.id}" data-tile="${tile.id}" data-icon="${tile.icon}" title="Change icon"><i class="ti ti-${tile.icon}"></i></button>
           <input type="text" placeholder="App link (URL)" value="${tile.url}" data-row="${row.id}" data-tile="${tile.id}" />
         `;
         wrap.appendChild(r);
@@ -640,19 +687,73 @@
         t.classList.toggle("on");
       });
     });
+
+    wrap.querySelectorAll(".icon-picker-btn").forEach(btn => {
+      btn.addEventListener("click", e => openIconPicker(e.currentTarget));
+    });
+  }
+
+  const ICON_CHOICES = [
+    "folder", "sitemap", "clipboard-check", "map", "chart-bar", "activity",
+    "message-circle", "file-check", "alert-triangle", "shield-check",
+    "calendar", "clock", "list-check", "report", "database", "cloud",
+    "users", "user", "settings", "tool", "bell", "checklist",
+    "file-text", "files", "gauge", "chart-line", "chart-pie",
+    "flag", "target", "bookmark", "layout-grid", "clipboard-list",
+    "phone", "mail", "help-circle", "info-circle"
+  ];
+
+  let openPopover = null;
+
+  function closeIconPicker() {
+    if (openPopover) { openPopover.remove(); openPopover = null; }
+    document.removeEventListener("click", handleOutsideClick, true);
+  }
+
+  function handleOutsideClick(e) {
+    if (openPopover && !openPopover.contains(e.target) && !e.target.closest(".icon-picker-btn")) {
+      closeIconPicker();
+    }
+  }
+
+  function openIconPicker(btn) {
+    if (openPopover) { closeIconPicker(); return; }
+
+    const pop = document.createElement("div");
+    pop.className = "icon-popover";
+    ICON_CHOICES.forEach(name => {
+      const opt = document.createElement("button");
+      opt.type = "button";
+      opt.innerHTML = `<i class="ti ti-${name}"></i>`;
+      opt.title = name;
+      opt.addEventListener("click", () => {
+        btn.dataset.icon = name;
+        btn.innerHTML = `<i class="ti ti-${name}"></i>`;
+        closeIconPicker();
+      });
+      pop.appendChild(opt);
+    });
+
+    document.body.appendChild(pop);
+    const rect = btn.getBoundingClientRect();
+    pop.style.top = `${window.scrollY + rect.bottom + 6}px`;
+    pop.style.left = `${window.scrollX + rect.left}px`;
+    openPopover = pop;
+
+    setTimeout(() => document.addEventListener("click", handleOutsideClick, true), 0);
   }
 
   function collectAdminChanges() {
     document.querySelectorAll(".admin-tile-row").forEach(rowEl => {
       const toggle = rowEl.querySelector(".toggle");
-      const iconInput = rowEl.querySelector(".icon-input");
-      const urlInput = rowEl.querySelector('input[type="text"]:not(.icon-input)');
+      const iconBtn = rowEl.querySelector(".icon-picker-btn");
+      const urlInput = rowEl.querySelector('input[type="text"]');
       const rowId = toggle.dataset.row;
       const tileId = toggle.dataset.tile;
       const row = config.rows.find(r => r.id === rowId);
       const tile = row.tiles.find(t => t.id === tileId);
       tile.enabled = toggle.classList.contains("on");
-      tile.icon = iconInput.value.trim();
+      tile.icon = iconBtn.dataset.icon;
       tile.url = urlInput.value.trim();
     });
   }
